@@ -3,6 +3,8 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include "productmodel.h"
+
 class DatabaseManager
 {
 public:
@@ -15,7 +17,7 @@ public:
     QSqlDatabase* getDB() {
         return &db;
     }
-
+    static void saveProduct(const productModel &product);
 private:
     QSqlDatabase db;
 };

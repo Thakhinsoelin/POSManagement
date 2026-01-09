@@ -25,6 +25,35 @@ void DatabaseManager::setupFirstTime()
                "username TEXT UNIQUE, "
                "password TEXT)");
 
+    query.exec("CREATE TABLE IF NOT EXISTS items ("
+               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+               "product_id INTEGER, "
+               "name TEXT, "
+               "image_data BLOB, "
+               "price INTEGER)"
+               );
+
     // Optional: Add a default admin if table is empty
     query.exec("INSERT OR IGNORE INTO users (username, password) VALUES ('admin', 'password123')");
 }
+
+void DatabaseManager::saveProduct(const productModel &product)
+{
+    QSqlQuery query;
+    query.prepare("INSERT INTO items (product_id, name, image_data, price) VALUES (:prodid, :name, :image, :price)");
+
+    query.bindValue(":prodid", product.getId());
+    qDebug() << product.getId()<< "\n";
+    query.bindValue(":name", product.getName());
+    qDebug() << product.getName() << "\n";
+    query.bindValue(":price", product.getPrice());
+    qDebug() << product.getPrice() << "\n";
+    // This sends the full, uncompressed binary data to the database
+    query.bindValue(":image", product.getImageBuffer());
+
+    if(!query.exec()) {
+        qDebug() << "SQL Error:" << query.lastError().text();
+    }
+
+}
+

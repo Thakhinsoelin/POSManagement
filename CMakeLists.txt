@@ -27,6 +27,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         style.qrc
         databasemanager.h databasemanager.cpp
         additemdialog.h additemdialog.cpp additemdialog.ui
+        productmodel.h productmodel.cpp
+        UserData.h
+        productmanager.h productmanager.cpp
+        productcard.h productcard.cpp
 
     )
 # Define target properties for Android with Qt 6 as:

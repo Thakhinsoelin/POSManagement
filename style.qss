@@ -1,13 +1,13 @@
 QMainWindow {
    background-color: white;
 }
-#loginBox {
+#loginBox, #stockBox {
    background-color: #2d2d2d;
    border-radius: 15px;
    padding: 20px;
 }
 
-#loginBox QLabel {
+#loginBox, #stockBox QLabel {
    color: white;
    font-weight: bold;
 }
