@@ -2,6 +2,7 @@
 #define PRODUCTMANAGER_H
 #include <QList>
 #include <QSqlQuery>
+#include <qsqlerror.h>
 #include "productmodel.h"
 #include "UserData.h"
 class productManager
@@ -13,10 +14,14 @@ public:
     QList<productModel> getAllProducts() {
         QList<productModel> list;
         QSqlQuery query(QSqlDatabase::database(this->m_userdata.db.databaseName()));
-        query.prepare("SELECT id, name, price, image_data FROM items");
+        query.prepare("SELECT id, name, image_data, price FROM items");
         // QSqlQuery query("SELECT id, name, price, image_data FROM items");
 
-        while (query.next()) {
+        if (!query.exec()) {
+            qWarning() << "Query failed:" << query.lastError().text();
+            return list;
+        }
+        while ( query.next()) {
             list.append(productModel(
                 query.value(0).toInt(),
                 query.value(1).toString(),

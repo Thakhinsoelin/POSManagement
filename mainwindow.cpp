@@ -43,11 +43,22 @@ MainWindow::MainWindow(UserData &userData, QWidget *parent)
     } else {
         qInfo() << "Could not open file. " << "\n";
     }
+
+    ui->CurrentItems->setWidgetResizable(false);
+
+    if (ui->productsContainer) {
+        // Ensure the container is allowed to grow but doesn't force a loop
+        ui->productsContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        if (!ui->productsContainer->layout()) {
+            QGridLayout *gridLayout = new QGridLayout(ui->productsContainer);
+            gridLayout->setAlignment(Qt::AlignTop);
+            // gridLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+        }
+    }
+
     ui->stackedWidget->setCurrentIndex(0);
 
-    QWidget *container = ui->CurrentItems->widget();
-    QGridLayout *gridLayout = new QGridLayout(container);
-    container->setLayout(gridLayout);
 }
 
 MainWindow::~MainWindow()
@@ -69,7 +80,11 @@ void MainWindow::on_loginButton_clicked()
         if (dbPassword == pass) {
             // QMessageBox::warning(this, "Login success", "nigger"); // Login success!
             ui->stackedWidget->setCurrentIndex(1);
+            qDebug() << "Before loading products";
+
             loadDashboardProducts();
+            qDebug() << "after loading products";
+
         } else {
             QMessageBox::warning(this, "Error", "Incorrect password.");
         }
@@ -93,34 +108,34 @@ void MainWindow::on_addNewItem_clicked()
 
 void MainWindow::loadDashboardProducts()
 {
-    QWidget *container = ui->CurrentItems->widget();
-
-    // Use a FlowLayout (or a Grid)
-    // If you don't have a FlowLayout class, a QGridLayout works well:
-    QGridLayout *gridLayout = new QGridLayout(container);
-    container->setLayout(gridLayout);
-
-    // 1. Clear existing items
+    qDebug() << "ENTER loadDashboardProducts";
+    QGridLayout *layout = qobject_cast<QGridLayout*>(ui->productsContainer->layout());
+    if (!layout) return;
+    qDebug() << "Layout OK";
+    // Use a temporary list to avoid deleting while iterating if needed
     QLayoutItem *item;
-    while ((item = gridLayout->takeAt(0)) != nullptr) {
-        delete item->widget();
+    while ((item = layout->takeAt(0)) != nullptr) {
+        if (QWidget *widget = item->widget()) {
+            widget->hide();
+            widget->deleteLater();
+        }
         delete item;
     }
+     qDebug() << "Cleared layout";
 
-    // 2. Fetch from database
     productManager manager(this->m_userData);
     QList<productModel> products = manager.getAllProducts();
-
-    int columnCount = 3; // How many rectangles per row
+    qDebug() << "Products fetched:" << products.size();
+    int columnCount = 3;
     for (int i = 0; i < products.size(); ++i) {
+        qDebug() << "Creating card" << i;
         ProductCard *card = new ProductCard(products[i]);
+        qDebug() << "Card constructed" << i;
+        // Set a minimum size for the card if it doesn't have one
+        card->setMinimumSize(200, 150);
+        layout->addWidget(card, i / columnCount, i % columnCount);
 
-        int row = i / columnCount;
-        int col = i % columnCount;
-        gridLayout->addWidget(card, row, col);
+        qDebug() << "Card added" << i;
     }
-
-    // 3. Add a spacer at the bottom so cards don't stretch weirdly
-    gridLayout->setRowStretch(gridLayout->rowCount(), 1);
+    qDebug() << "Exit dashboard";
 }
-
