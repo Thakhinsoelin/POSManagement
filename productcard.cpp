@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QCursor>
+#include <string>
 #include "additemdialog.h"
 #include "databasemanager.h"
 void ProductCard::contextMenuEvent(QContextMenuEvent *event)
@@ -19,14 +20,24 @@ void ProductCard::contextMenuEvent(QContextMenuEvent *event)
     // Connect actions to logic
     connect(editAction, &QAction::triggered, this, [=]() {
         qDebug() << "Edit clicked for:" << this->model.getId(); // Or use a stored product ID
-        AddItemDialog dialog(this);
+        AddItemDialog dialog(this->window(), AddItemDialog::Mode::EditMode);
         dialog.setWindowTitle("Edit item");
-
+        dialog.writeProductID(QString::number(this->model.getId()));
+        dialog.writeProductName(this->model.getName());
+        dialog.writePixmap(this->model.getImageBuffer());
+        dialog.writeProductPrice(QString::number(this->model.getPrice()));
         if(dialog.exec() == QDialog::Accepted) {
             qDebug() << "User clicked OK\n";
-            loadDashboardProducts();
+            DatabaseManager::updateProduct(productModel(
+                atoi(dialog.getProductID().toStdString().c_str()),
+                dialog.getProductName(),
+                dialog.getPixmap(),
+                atoi(dialog.getProductPrice().toStdString().c_str())), QString(this->model.getName()));
+            emit productChanged();
+
         } else {
             qDebug() << "User cancelled";
+        }
     });
 
     connect(deleteAction, &QAction::triggered, this, [=]() {
@@ -37,15 +48,16 @@ void ProductCard::contextMenuEvent(QContextMenuEvent *event)
 
     // Execute the menu at the cursor position
     menu.exec(event->globalPos());
-}
+};
 
 ProductCard::ProductCard( productModel &product, QWidget *parent) : QFrame(parent),
-    model(product){
+    model(product)
+{
 
     this->setContextMenuPolicy(Qt::DefaultContextMenu);
     // 1. Style the rectangle
     this->setFixedSize(200, 300);
-    this->setStyleSheet("ProductCard { border: 1px solid #ddd; border-radius: 10px; background: white; } "
+    this->setStyleSheet("ProductCard { border: 1px solid #ddd; border-radius: 10px; background: black; } "
                         "ProductCard:hover { background-color: #f9f9f9; border-color: #3498db; }");
 
     QVBoxLayout *layout = new QVBoxLayout(this);

@@ -7,11 +7,13 @@
 class productModel
 {
     int id;
+
     QString name;
     QByteArray imageBuffer;
     int price;
     QPixmap thumbnail;
 public:
+    int db_id;
     productModel(int id, QString name, QByteArray imageBuffer, int price);
 
     // Getters

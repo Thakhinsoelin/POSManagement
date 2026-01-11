@@ -19,6 +19,7 @@ public:
     }
     static void saveProduct(const productModel &product);
     static void deleteProduct(const productModel &product);
+    static void updateProduct(const productModel& product, QString currentName);
 private:
     QSqlDatabase db;
 };
