@@ -13,11 +13,17 @@ class AddItemDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddItemDialog(QWidget *parent = nullptr);
+    enum Mode { AddMode, EditMode };
+    explicit AddItemDialog(QWidget *parent = nullptr, Mode mode = AddMode);
     void writeProductID(QString productID);
     void writeProductPrice(QString price);
     void writeProductName(QString name);
-    void writePixmap(QByteArray& array);
+    void writePixmap(QByteArray array);
+
+    QString getProductID();
+    QString getProductPrice();
+    QString getProductName();
+    QByteArray getPixmap();
 
     ~AddItemDialog();
 
@@ -30,6 +36,7 @@ private:
     Ui::AddItemDialog *ui;
     QString selectedImagePath;
     productModel m_model;
+    Mode currentMode;
     // UserData m_data;
 
     QByteArray tempImageData;

@@ -94,7 +94,7 @@ void MainWindow::on_loginButton_clicked()
 
 void MainWindow::on_addNewItem_clicked()
 {
-    AddItemDialog dialog(this->m_userData,this);
+    AddItemDialog dialog(this);
     dialog.setWindowTitle("Add a new item");
 
     if(dialog.exec() == QDialog::Accepted) {

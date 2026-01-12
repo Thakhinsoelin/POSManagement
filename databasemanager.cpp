@@ -66,3 +66,20 @@ void DatabaseManager::deleteProduct(const productModel& product) {
         qDebug() << "SQL Error:" << query.lastError().text();
     }
 }
+
+void DatabaseManager::updateProduct(const productModel& product, QString currentName) {
+    QSqlQuery query;
+    query.prepare("UPDATE items SET product_id = :prodid, name = :name, image_data = :image, price = :price "
+                  "WHERE name = :currentName");
+    query.bindValue(":prodid", product.getId());
+    query.bindValue(":name", product.getName());
+    query.bindValue(":image", product.getImageBuffer());
+    query.bindValue(":price", product.getPrice());
+    query.bindValue(":currentName", currentName);
+    if(!query.exec()) {
+        qDebug() << "SQL Error:" << query.lastError().text();
+    } else {
+        qDebug() << "SQL update success.";
+    }
+
+}

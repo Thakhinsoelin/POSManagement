@@ -6,8 +6,9 @@
 #include <QSqlQuery>
 #include "databasemanager.h"
 
-AddItemDialog::AddItemDialog( QWidget *parent)
+AddItemDialog::AddItemDialog( QWidget *parent, Mode mode)
     : QDialog(parent)
+    , currentMode(mode)
     , m_model(0, "", nullptr, 0)
     , ui(new Ui::AddItemDialog)
 {
@@ -29,9 +30,37 @@ void AddItemDialog::writeProductName(QString name)
     this->ui->productName->setText(name);
 }
 
-void AddItemDialog::writePixmap(QByteArray &array)
+void AddItemDialog::writePixmap(QByteArray array)
 {
-    this->ui->lblImagePreview->setPixmap(QPixmap::)
+    QPixmap pixmap;
+    if(pixmap.loadFromData(array)) {
+        int w = 120;
+        int h = 120;
+        this->ui->lblImagePreview->setPixmap(pixmap.scaled(w,h,Qt::KeepAspectRatio));
+    } else {
+        qDebug() << "Pixmap conversion failed";
+    }
+
+}
+
+QString AddItemDialog::getProductID()
+{
+    return this->ui->productID->text();
+}
+
+QString AddItemDialog::getProductPrice()
+{
+    return this->ui->productPrice->text();
+}
+
+QString AddItemDialog::getProductName()
+{
+    return this->ui->productName->text();
+}
+
+QByteArray AddItemDialog::getPixmap()
+{
+    return this->tempImageData;
 }
 
 AddItemDialog::~AddItemDialog()
@@ -64,11 +93,13 @@ void AddItemDialog::on_btnSelectImage_clicked()
 
 void AddItemDialog::on_addBtn_accepted()
 {
-    int id = atoi( ui->productID->text().toStdString().c_str());
-    QString name = ui->productName->text();
-    int price = atoi(ui->productPrice->text().toStdString().c_str());
-    this->m_model.setFields(id, name, tempImageData, price);
+    if(currentMode == AddMode) {
+        int id = atoi( ui->productID->text().toStdString().c_str());
+        QString name = ui->productName->text();
+        int price = atoi(ui->productPrice->text().toStdString().c_str());
+        this->m_model.setFields(id, name, tempImageData, price);
 
-    DatabaseManager::saveProduct(this->m_model);
+        DatabaseManager::saveProduct(this->m_model);
+    }
 }
 
