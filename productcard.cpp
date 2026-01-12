@@ -24,14 +24,21 @@ void ProductCard::contextMenuEvent(QContextMenuEvent *event)
         dialog.setWindowTitle("Edit item");
         dialog.writeProductID(QString::number(this->model.getId()));
         dialog.writeProductName(this->model.getName());
+        dialog.writeProductAmount(QString::number(this->model.getAmount()));
         dialog.writePixmap(this->model.getImageBuffer());
         dialog.writeProductPrice(QString::number(this->model.getPrice()));
+
+        QByteArray temp = dialog.getPixmap();
+        if(temp == nullptr) {
+            temp = this->model.getImageBuffer();
+        }
         if(dialog.exec() == QDialog::Accepted) {
             qDebug() << "User clicked OK\n";
             DatabaseManager::updateProduct(productModel(
                 atoi(dialog.getProductID().toStdString().c_str()),
                 dialog.getProductName(),
-                dialog.getPixmap(),
+                atoi(dialog.getProductAmount().toStdString().c_str()),
+                temp,
                 atoi(dialog.getProductPrice().toStdString().c_str())), QString(this->model.getName()));
             emit productChanged();
 
@@ -76,10 +83,14 @@ ProductCard::ProductCard( productModel &product, QWidget *parent) : QFrame(paren
     nameLabel->setWordWrap(true);
     nameLabel->setAlignment(Qt::AlignLeft);
 
+    QLabel *amountLabel = new QLabel(QString::number(product.getAmount()) + " left");
+    amountLabel->setStyleSheet("color: #27ae60; font-size: 13px;");
+
     QLabel *priceLabel = new QLabel(QString::number(product.getPrice()) + " MMK");
     priceLabel->setStyleSheet("color: #27ae60; font-size: 13px;");
 
     layout->addWidget(imgLabel);
     layout->addWidget(nameLabel);
+    layout->addWidget(amountLabel);
     layout->addWidget(priceLabel);
 }

@@ -14,19 +14,20 @@ public:
     QList<productModel> getAllProducts() {
         QList<productModel> list;
         QSqlQuery query(QSqlDatabase::database(this->m_userdata.db.databaseName()));
-        query.prepare("SELECT id, name, image_data, price FROM items");
+        query.prepare("SELECT product_id, name, amount, image_data, price FROM items");
         // QSqlQuery query("SELECT id, name, price, image_data FROM items");
 
         if (!query.exec()) {
-            qWarning() << "Query failed:" << query.lastError().text();
+            qWarning() << "Query failed get all product:" << query.lastError().text();
             return list;
         }
         while ( query.next()) {
             list.append(productModel(
                 query.value(0).toInt(),
                 query.value(1).toString(),
-                query.value(2).toByteArray(),
-                query.value(3).toInt()
+                query.value(2).toInt(),
+                query.value(3).toByteArray(),
+                query.value(4).toInt()
                 ));
         }
         return list;

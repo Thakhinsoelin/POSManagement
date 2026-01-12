@@ -29,6 +29,7 @@ void DatabaseManager::setupFirstTime()
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                "product_id INTEGER, "
                "name TEXT, "
+               "amount INTEGER, "
                "image_data BLOB, "
                "price INTEGER)"
                );
@@ -40,26 +41,27 @@ void DatabaseManager::setupFirstTime()
 void DatabaseManager::saveProduct(const productModel &product)
 {
     QSqlQuery query;
-    query.prepare("INSERT INTO items (product_id, name, image_data, price) VALUES (:prodid, :name, :image, :price)");
+    query.prepare("INSERT INTO items (product_id, name, amount, image_data, price) VALUES (:prodid, :name, :amount, :image, :price)");
 
     query.bindValue(":prodid", product.getId());
     qDebug() << product.getId()<< "\n";
     query.bindValue(":name", product.getName());
     qDebug() << product.getName() << "\n";
+    query.bindValue(":amount", product.getAmount());
     query.bindValue(":price", product.getPrice());
     qDebug() << product.getPrice() << "\n";
     // This sends the full, uncompressed binary data to the database
     query.bindValue(":image", product.getImageBuffer());
 
     if(!query.exec()) {
-        qDebug() << "SQL Error:" << query.lastError().text();
+        qDebug() << "SQL Error: save product" << query.lastError().text();
     }
 
 }
 
 void DatabaseManager::deleteProduct(const productModel& product) {
     QSqlQuery query;
-    query.prepare("DELETE FROM items WHERE id = :id");
+    query.prepare("DELETE FROM items WHERE product_id = :id");
     query.bindValue(":id", product.getId());
 
     if(!query.exec()) {
@@ -69,10 +71,11 @@ void DatabaseManager::deleteProduct(const productModel& product) {
 
 void DatabaseManager::updateProduct(const productModel& product, QString currentName) {
     QSqlQuery query;
-    query.prepare("UPDATE items SET product_id = :prodid, name = :name, image_data = :image, price = :price "
+    query.prepare("UPDATE items SET product_id = :prodid, name = :name, amount = :amount, image_data = :image, price = :price "
                   "WHERE name = :currentName");
     query.bindValue(":prodid", product.getId());
     query.bindValue(":name", product.getName());
+    query.bindValue(":amount", product.getAmount());
     query.bindValue(":image", product.getImageBuffer());
     query.bindValue(":price", product.getPrice());
     query.bindValue(":currentName", currentName);

@@ -1,6 +1,5 @@
 #ifndef ADDITEMDIALOG_H
 #define ADDITEMDIALOG_H
-#include "UserData.h"
 #include "productmodel.h"
 #include <QDialog>
 
@@ -19,10 +18,12 @@ public:
     void writeProductPrice(QString price);
     void writeProductName(QString name);
     void writePixmap(QByteArray array);
+    void writeProductAmount(QString amount);
 
     QString getProductID();
     QString getProductPrice();
     QString getProductName();
+    QString getProductAmount();
     QByteArray getPixmap();
 
     ~AddItemDialog();

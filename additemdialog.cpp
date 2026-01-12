@@ -9,7 +9,7 @@
 AddItemDialog::AddItemDialog( QWidget *parent, Mode mode)
     : QDialog(parent)
     , currentMode(mode)
-    , m_model(0, "", nullptr, 0)
+    , m_model(0, "", 0, nullptr, 0)
     , ui(new Ui::AddItemDialog)
 {
     ui->setupUi(this);
@@ -43,6 +43,11 @@ void AddItemDialog::writePixmap(QByteArray array)
 
 }
 
+void AddItemDialog::writeProductAmount(QString amount)
+{
+    this->ui->productAmount->setText(amount);
+}
+
 QString AddItemDialog::getProductID()
 {
     return this->ui->productID->text();
@@ -56,6 +61,11 @@ QString AddItemDialog::getProductPrice()
 QString AddItemDialog::getProductName()
 {
     return this->ui->productName->text();
+}
+
+QString AddItemDialog::getProductAmount()
+{
+    return this->ui->productAmount->text();
 }
 
 QByteArray AddItemDialog::getPixmap()
@@ -72,7 +82,7 @@ void AddItemDialog::on_btnSelectImage_clicked()
 {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Select Image"), "",
-                                                    tr("Images (*.png *.jpg *.jpeg *.bmp)"));
+                                                    tr("Images (*.png *.jpg *.jpeg *.bmp *.avif)"));
     if(!filename.isEmpty()) {
         selectedImagePath = filename;
         QFile file(filename);
@@ -87,6 +97,8 @@ void AddItemDialog::on_btnSelectImage_clicked()
             ui->lblImagePreview->setPixmap(pix.scaled(w,h,Qt::KeepAspectRatio));
         }
 
+    } else {
+        this->tempImageData = nullptr;
     }
 }
 
@@ -97,7 +109,8 @@ void AddItemDialog::on_addBtn_accepted()
         int id = atoi( ui->productID->text().toStdString().c_str());
         QString name = ui->productName->text();
         int price = atoi(ui->productPrice->text().toStdString().c_str());
-        this->m_model.setFields(id, name, tempImageData, price);
+        int amount = atoi(ui->productAmount->text().toStdString().c_str());
+        this->m_model.setFields(id, name, amount, tempImageData, price);
 
         DatabaseManager::saveProduct(this->m_model);
     }
