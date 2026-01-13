@@ -32,15 +32,16 @@ void AddItemDialog::writeProductName(QString name)
 
 void AddItemDialog::writePixmap(QByteArray array)
 {
-    QPixmap pixmap;
-    if(pixmap.loadFromData(array)) {
-        int w = 120;
-        int h = 120;
-        this->ui->lblImagePreview->setPixmap(pixmap.scaled(w,h,Qt::KeepAspectRatio));
-    } else {
-        qDebug() << "Pixmap conversion failed";
+    if(array != nullptr) {
+        QPixmap pixmap;
+        if(pixmap.loadFromData(array)) {
+            int w = 120;
+            int h = 120;
+            this->ui->lblImagePreview->setPixmap(pixmap.scaled(w,h,Qt::KeepAspectRatio));
+        } else {
+            qDebug() << "Pixmap conversion failed";
+        }
     }
-
 }
 
 void AddItemDialog::writeProductAmount(QString amount)
@@ -70,6 +71,7 @@ QString AddItemDialog::getProductAmount()
 
 QByteArray AddItemDialog::getPixmap()
 {
+    qDebug() << "From getpixmap function " << this->tempImageData;
     return this->tempImageData;
 }
 
@@ -88,6 +90,7 @@ void AddItemDialog::on_btnSelectImage_clicked()
         QFile file(filename);
         if(file.open(QIODevice::ReadOnly)) {
             this->tempImageData = file.readAll();
+
             file.close();
 
             QPixmap pix(filename);
@@ -96,7 +99,6 @@ void AddItemDialog::on_btnSelectImage_clicked()
             int h = 120;//ui->lblImagePreview->height();
             ui->lblImagePreview->setPixmap(pix.scaled(w,h,Qt::KeepAspectRatio));
         }
-
     } else {
         this->tempImageData = nullptr;
     }
@@ -110,8 +112,9 @@ void AddItemDialog::on_addBtn_accepted()
         QString name = ui->productName->text();
         int price = atoi(ui->productPrice->text().toStdString().c_str());
         int amount = atoi(ui->productAmount->text().toStdString().c_str());
-        this->m_model.setFields(id, name, amount, tempImageData, price);
 
+        qDebug() << "From inside button upload of image data: " << this->tempImageData;
+        this->m_model.setFields(id, name, amount, tempImageData, price);
         DatabaseManager::saveProduct(this->m_model);
     }
 }

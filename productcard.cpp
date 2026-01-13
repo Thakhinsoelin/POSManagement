@@ -8,6 +8,7 @@
 #include <string>
 #include "additemdialog.h"
 #include "databasemanager.h"
+#include <assert.h>
 void ProductCard::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
@@ -25,14 +26,20 @@ void ProductCard::contextMenuEvent(QContextMenuEvent *event)
         dialog.writeProductID(QString::number(this->model.getId()));
         dialog.writeProductName(this->model.getName());
         dialog.writeProductAmount(QString::number(this->model.getAmount()));
+
+        qDebug() << "Before pixmap writing: " << dialog.getPixmap();
+        // qDebug() << "Before pixmap writing and " << dialog.getPixmap();
         dialog.writePixmap(this->model.getImageBuffer());
+        qDebug() << "After pixmap writing: " << dialog.getPixmap();
         dialog.writeProductPrice(QString::number(this->model.getPrice()));
 
-        QByteArray temp = dialog.getPixmap();
-        if(temp == nullptr) {
-            temp = this->model.getImageBuffer();
-        }
+        // qDebug() << temp ;
+
         if(dialog.exec() == QDialog::Accepted) {
+            QByteArray temp = dialog.getPixmap();
+            if(temp == nullptr) {
+                temp = this->model.getImageBuffer();
+            }
             qDebug() << "User clicked OK\n";
             DatabaseManager::updateProduct(productModel(
                 atoi(dialog.getProductID().toStdString().c_str()),
