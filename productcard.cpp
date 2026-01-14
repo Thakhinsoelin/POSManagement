@@ -101,3 +101,13 @@ ProductCard::ProductCard( productModel &product, QWidget *parent) : QFrame(paren
     layout->addWidget(amountLabel);
     layout->addWidget(priceLabel);
 }
+
+void ProductCard::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton) {
+        if(event->button() == Qt::LeftButton) {
+            emit clicked(this->model);
+        }
+    }
+    QFrame::mousePressEvent(event);
+}

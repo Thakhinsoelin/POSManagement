@@ -1,7 +1,7 @@
 QMainWindow {
    background-color: white;
 }
-#loginBox, #stockBox {
+#loginBox, #stockBox, #checkoutPage {
    background-color: #2d2d2d;
    border-radius: 15px;
    padding: 20px;
@@ -12,10 +12,73 @@ QMainWindow {
    font-weight: bold;
 }
 
+ProductCard:pressed { background-color: #dcdcdc; }
+
 QLineEdit {
    background-color: white;
    border: 1px solid gray;
    border-radius: 5px;
    padding: 5px;
    color: black;
+}
+
+/* The background of the entire scrollable area */
+#checkoutItems {
+    background-color: #2d2d2d;
+    border: none;
+}
+
+/* Style for each 'Row' widget we add to the checkout */
+.CheckoutRow {
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin: 2px 5px;
+}
+
+.CheckoutRow:hover {
+    background-color: #f1f7fe;
+}
+
+/* Specific Label Styling */
+#ItemNameLabel {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+#ItemPriceLabel {
+    color: #27ae60;
+    font-weight: bold;
+    font-family: 'Courier New'; /* Gives it a receipt feel */
+    font-size: 14px;
+}
+
+/* The 'X' delete button */
+#RemoveItemBtn {
+    background-color: transparent;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+#RemoveItemBtn:hover {
+    background-color: #e74c3c;
+    color: white;
+}
+
+QScrollBar:vertical {
+    border: none;
+    background: #f1f1f1;
+    width: 8px;
+    margin: 0px;
+}
+QScrollBar::handle:vertical {
+    background: #ccc;
+    min-height: 20px;
+    border-radius: 4px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #999;
 }

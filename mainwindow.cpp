@@ -45,7 +45,7 @@ MainWindow::MainWindow(UserData &userData, QWidget *parent)
     }
 
     ui->CurrentItems->setWidgetResizable(true);
-
+    ui->availableItemsScrollArea->setWidgetResizable(true);
     // Initialize the grid layout on the internal container
     if (ui->productsContainer) {
         QGridLayout *gridLayout = new QGridLayout(ui->productsContainer);
@@ -54,7 +54,16 @@ MainWindow::MainWindow(UserData &userData, QWidget *parent)
         gridLayout->setContentsMargins(10, 10, 10, 10);
         gridLayout->setSpacing(15);
     }
-    loadDashboardProducts();
+
+    if(ui->availableItemsContainer) {
+        QGridLayout* gridLayout = new QGridLayout(ui->availableItemsContainer);
+        gridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+        gridLayout->setContentsMargins(10, 10, 10, 10);
+        gridLayout->setSpacing(10);
+    }
+
+    loadDashboardProducts(this->ui->productsContainer, 7);
+    loadDashboardProducts(this->ui->availableItemsContainer, 5);
     // ui->stackedWidget->setCurrentIndex(0);
 
 }
@@ -80,7 +89,7 @@ void MainWindow::on_loginButton_clicked()
             ui->stackedWidget->setCurrentIndex(1);
             qDebug() << "Before loading products";
 
-            loadDashboardProducts();
+            loadDashboardProducts(this->ui->productsContainer, 7);
             qDebug() << "after loading products";
 
         } else {
@@ -99,17 +108,17 @@ void MainWindow::on_addNewItem_clicked()
 
     if(dialog.exec() == QDialog::Accepted) {
         qDebug() << "User clicked OK\n";
-        loadDashboardProducts();
+        loadDashboardProducts(this->ui->productsContainer, 7);
     } else {
         qDebug() << "User cancelled";
     }
 }
 
-void MainWindow::loadDashboardProducts()
+void MainWindow::loadDashboardProducts(QWidget* container, int columnCount)
 {
-    ui->productsContainer->setUpdatesEnabled(false);
+    container->setUpdatesEnabled(false);
     // Find the layout we created in the constructor
-    QGridLayout *layout = qobject_cast<QGridLayout*>(ui->productsContainer->layout());
+    QGridLayout *layout = qobject_cast<QGridLayout*>(container->layout());
     if (!layout) return;
 
     // 1. Clear existing items safely
@@ -126,17 +135,70 @@ void MainWindow::loadDashboardProducts()
     QList<productModel> products = manager.getAllProducts();
 
     // 3. Create and add a ProductCard for each item
-    int columnCount = 7;
     for (int i = 0; i < products.size(); ++i) {
         ProductCard *card = new ProductCard(products[i]);
-
+        connect(card, &ProductCard::clicked, this, &MainWindow::addToCheckOut);
         // It's helpful to set a minimum size for cards to ensure they look uniform
         card->setMinimumSize(200, 250);
 
         int row = i / columnCount;
         int col = i % columnCount;
-        connect(card, &ProductCard::productChanged, this, &MainWindow::loadDashboardProducts);
+        connect(card, &ProductCard::productChanged, this, [this]() {
+            loadDashboardProducts(this->ui->productsContainer, 7);
+        });
         layout->addWidget(card, row, col);
     }
-    ui->productsContainer->setUpdatesEnabled(true);
+    container->setUpdatesEnabled(true);
+}
+
+void MainWindow::addToCheckOut(const productModel &product)
+{
+    if(this->ui->stackedWidget->currentIndex() == 2) {
+        // 1. Get the layout of the checkoutItems widget
+        QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(ui->checkoutItems->layout());
+
+        // If no layout exists yet, create one
+        if (!layout) {
+            layout = new QVBoxLayout(ui->checkoutItems);
+            layout->setAlignment(Qt::AlignTop);
+            ui->checkoutItems->setLayout(layout);
+        }
+
+        // 2. Create a simple horizontal widget for the row
+        QWidget *row = new QWidget();
+        row->setProperty("class", "CheckoutRow");
+        QHBoxLayout *rowLayout = new QHBoxLayout(row);
+
+        QLabel *name = new QLabel(product.getName());
+        name->setObjectName("ItemNameLabel");
+        QLabel *price = new QLabel(QString::number(product.getPrice()) + " MMK");
+        price->setObjectName("ItemPriceLabel");
+        QPushButton *removeBtn = new QPushButton("X");
+        removeBtn->setFixedWidth(30);
+
+        rowLayout->addWidget(name);
+        rowLayout->addStretch(); // Pushes price and button to the right
+        rowLayout->addWidget(price);
+        rowLayout->addWidget(removeBtn);
+
+        // 3. Add to the scroll area
+        layout->addWidget(row);
+
+        // 4. Update your total labels (totalAmountItems and totalBalance)
+        updateTotals(product.getPrice());
+
+        // Connect remove button logic
+        connect(removeBtn, &QPushButton::clicked, [=](){
+            row->deleteLater();
+            updateTotals(-product.getPrice()); // Subtract from total
+        });
+        qDebug("This is no. 2");
+    }
+    qDebug("clicked");
+}
+
+void MainWindow::updateTotals(int price)
+{
+    this->m_totalBalance += price;
+    qDebug() << "Total Balance now: " << m_totalBalance;
 }
